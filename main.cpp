@@ -2,6 +2,7 @@
 #include<iostream>
 #include<math.h>
 #include<string.h>
+#include<chrono>
 #define length 1000
 #define width 700
 #define n 3
@@ -50,7 +51,7 @@ void DrawCircle(SDL_Renderer * renderer, int32_t centreX, int32_t centreY, int32
 
 class bodies{
     public:
-        float mass,ax=0,ay=0,x,y,radius=10,vx,vy,dt=0.001;
+        float mass=50000,ax=0,ay=0,x,y,radius=10,vx=0,vy=0,dt=0.01;
 
         void calc_vel()
         {
@@ -73,34 +74,17 @@ bodies body[3];
 
 void update_info()
 {
-    // Initialize positions
-    body[0].x = 700;  // Body 1 at (700, 350)
+
+    body[0].x = 700; 
     body[0].y = 350;
     
-    body[1].x = 300;  // Body 2 at (300, 550)
+    body[1].x = 300; 
     body[1].y = 550;
     
-    body[2].x = 300;  // Body 3 at (300, 150)
+    body[2].x = 300;  
     body[2].y = 150;
 
-    // Initialize velocities
-    float R = 200;
-    float v_initial = sqrt(grav_const * body[0].mass / R);  // Initial velocity magnitude
-    
-    body[0].vx = 0;
-    body[0].vy = v_initial;
-    
-    body[1].vx = 0;
-    body[1].vy = v_initial;
-    
-    body[2].vx = 0;
-    body[2].vy = v_initial;
 
-    // Set mass and timestep
-    for (int i = 0; i < 3; ++i) {
-        body[i].mass = 10000;  // Set mass to 10000 for each body
-        body[i].dt = 0.001;    // Set timestep dt to 0.001
-    }
 }
 
 
@@ -132,7 +116,7 @@ void render(SDL_Renderer* renderer)
 
     while (!quit)
     {
-       
+        auto start = std::chrono::high_resolution_clock::now();
         while (SDL_PollEvent(&event) != 0)
         {
             if (event.type == SDL_QUIT)
@@ -182,7 +166,18 @@ void render(SDL_Renderer* renderer)
         
         
         SDL_RenderClear(renderer);
+          auto end = std::chrono::high_resolution_clock::now();
 
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        
+        float fix=17-duration.count();
+        if(fix>=0){
+	
+    SDL_Delay((int)fix);
+    std::cout << "Current FrameRate: " << 1000.0f/(duration.count()+fix) <<" FPS"<< std::endl;
+    }
+    else if(fix<0){
+std::cout << "Current FrameRate: " << 1000.0f/(duration.count()) <<" FPS"<< std::endl;}
 
     }
     
@@ -208,11 +203,7 @@ int main(int argv,char** args )
         return 0;
 
 }
-void calc_COM()
-{
-    COM_x=((body[0].mass*body[0].x)+(body[1].mass*body[1].x)+(body[2].mass*body[2].x))/(body[0].mass+body[1].mass+body[2].mass);
-    COM_y=((body[0].mass*body[0].y)+(body[1].mass*body[1].y)+(body[2].mass*body[2].y))/(body[0].mass+body[1].mass+body[2].mass);
-}
+
 void body_collision() {
     for(int i=0;i<3;i++)
     {
